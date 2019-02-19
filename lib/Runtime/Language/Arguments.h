@@ -12,6 +12,17 @@
     va_list _vl;                                                    \
     va_start(_vl, callInfo);                                        \
     Js::Var* va = (Js::Var*)_vl
+#elif defined(__ANDROID__)
+// Just iterate and copy the values into a temp stack array
+#define DECLARE_ARGS_VARARRAY(va, ...)                              \
+    Js::Var* va = reinterpret_cast<Js::Var*>(alloca(sizeof(Js::Var)*(callInfo.Count + (callInfo.Count & 1)))); \
+    va_list _vl;                                                    \
+    va_start(_vl, callInfo);                                        \
+    va_arg(_vl, Js::Var);                                           \
+    va_arg(_vl, Js::Var);                                           \
+    for (int _i = 0; _i < callInfo.Count; ++_i)                     \
+        va[_i] = va_arg(_vl, Js::Var);                              \
+    va_end(_vl)
 #else
 // We use a custom calling convention to invoke JavascriptMethod based on
 // System ABI. At entry of JavascriptMethod the stack layout is:
@@ -81,7 +92,7 @@ inline int _count_args(const T1&, const T2&, const T3&, const T4&, const T5&, Js
 #elif defined(_ARM_)
 // xplat-todo: fix me ARM
 #define CALL_ENTRYPOINT_NOASSERT(entryPoint, function, callInfo, ...) \
-    entryPoint(function, callInfo, ##__VA_ARGS__)
+    entryPoint(function, callInfo, function, callInfo, ##__VA_ARGS__)
 #else
 #error CALL_ENTRYPOINT_NOASSERT not yet implemented
 #endif

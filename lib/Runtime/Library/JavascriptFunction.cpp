@@ -1359,7 +1359,11 @@ dbl_align:
 #elif defined(_M_ARM)
     extern "C"
     {
+#ifdef _WIN32
         extern Var arm_CallFunction(JavascriptFunction* function, CallInfo info, uint argCount, Var* values, JavascriptMethod entryPoint);
+#else
+        extern Var arm_CallFunction(JavascriptFunction* function, CallInfo info, Var* values, JavascriptMethod entryPoint);
+#endif
     }
 
     extern "C" Var BreakSpeculation(Var passthrough)
@@ -1395,8 +1399,13 @@ dbl_align:
         }
         else
         {
+#ifdef _WIN32
             varResult = JS_REENTRANCY_CHECK(function->GetScriptContext()->GetThreadContext(),
                 arm_CallFunction((JavascriptFunction*)function, args.Info, argCount, args.Values, entryPoint));
+#else
+            varResult = JS_REENTRANCY_CHECK(function->GetScriptContext()->GetThreadContext(),
+                arm_CallFunction((JavascriptFunction*)function, args.Info, args.Values, entryPoint));
+#endif
         }
 
         return varResult;

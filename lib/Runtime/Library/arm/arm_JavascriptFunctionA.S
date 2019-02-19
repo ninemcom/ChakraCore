@@ -37,7 +37,7 @@
         push_nonvol_reg {lr}
 
 
-        mov     r0, sp              // Pass the address of the function at the saved r0 in case it need to be boxed
+        add     r0, sp, #8          // Pass the address of the function at the saved r0 in case it need to be boxed
         bl      _ZN2Js18JavascriptFunction13DeferredParseEPPNS_14ScriptFunctionE
         mov     r12,r0              // back up entryPoint in R12
 
@@ -47,7 +47,7 @@
         bx      r12          // jump (tail call) to new entryPoint
     NESTED_END _ZN2Js18JavascriptFunction20DeferredParsingThunkEPNS_16RecyclableObjectENS_8CallInfoEz, _TEXT
 
-.arm
+// .arm
     NESTED_ENTRY arm_CallFunction, _TEXT, NoHandler
 
     // IMPORTANT: the number of pushed registers (even vs odd) must be consistent with 8-bytes align check below.
@@ -59,29 +59,24 @@
 #endif
     PROLOG_STACK_SAVE r7       // mov r7,sp -- save stack frame for restoring at the epilog.
 
-
     // All but two values go onto the stack ... calculate the number of values on the stack.
     mov     r4,r1               // r4 = callInfo.
     bfc     r4,#24,#8           // clear high order 8 bits of r6 -- clean callInfo.Flags which shares same word as callInfo.Count.
-    sub     r4,r4,#2            // subtract 2 == number of values that we can pass via registers.
-    mov     r5,r4,lsl #2        // r5 = space needed on the stack for values.
 
     // Adjust sp to meet ABI requirement: stack must be 8-bytes aligned at any function boundary.
     // Each reg is 4 bytes, so as we push 4 (even) regs above, r1 == odd number of regs breaks 8-byte alignment, even is OK.
     asrs    r12,r4,#1           // r-shift r1 into carry - set carry flag if r4 is odd. Note: the value in r12 is not used.
     addcs   r4, r4, #1            // if carry is set, add space for one more argument on stack to guarantee 8-byte alignment.
-
-    // offset stack by the amount of space we'll need.
-    sub     sp,sp,r4
+    mov     r5,r4,lsl #2        // r5 = space needed on the stack for values.
 
     mov     r4,r3                               // copy entryPoint to r4 so we can use r3 as a scratch variable
+    sub     sp,r5                               // reserve space for Value arguments
 
-    add     r2,r2,#8                            // add 8 to r2 (so it is the address of the first value to be placed on the stack).
     mov     r12,#0                              // offset for getting values/storing on stack.
 
 LOCAL_LABEL(argN):
     cmp     r5,r12
-    beq     LOCAL_LABEL(arg2)                   // if r5 == r12, no more values need to go onto the stack.
+    beq     LOCAL_LABEL(arg0)                   // if r5 == r12, no more values need to go onto the stack.
 
         ldr     r3,[r2,r12]                     // r3 = *(r2 + r12)
         str     r3,[sp,r12]                     // *(sp + r12) = r3
@@ -89,7 +84,7 @@ LOCAL_LABEL(argN):
         add     r12,r12,#4                      // offset increases by 4.
     b   LOCAL_LABEL(argN)                       // goto argN
 
-LOCAL_LABEL(arg2):
+LOCAL_LABEL(arg0):
     // Verify that the call target is valid, and process last two arguments
 #if defined(_CONTROL_FLOW_GUARD)
     mov     r5, r0    // save argument registers
@@ -106,11 +101,11 @@ LOCAL_LABEL(arg2):
     mov     r2, r8
 #endif
 
-    // Push values[1] into r3
-    ldr     r3,[r2,#-4]                         // r3 = *(r2-4) = values[1]
+    // Copy r1(CallInfo) into r3
+    mov     r3, r1
 
-    // Push values[0] into r2
-    ldr     r2,[r2,#-8]                         // r2 = *(r2-8) = values[0]
+    // Copy r0(function) into r2
+    mov     r2, r0
 
     blx     r4                                  // call r4 (== entry point)
 
@@ -118,9 +113,11 @@ LOCAL_LABEL(arg2):
 #if defined(_CONTROL_FLOW_GUARD)
     EPILOG_POP {r8-r9}
 #endif
-    EPILOG_POP {pc}
+    EPILOG_POP {lr}
     EPILOG_POP {r11}
     EPILOG_POP {r4-r7}
+
+    bx lr
 
     NESTED_END arm_CallFunction, _TEXT
 

@@ -143,7 +143,7 @@ else
 fi
 
 SET_CUSTOM_ICU() {
-    ICU_PATH=$1
+    ICU_PATH="$1"
     if [[ ! -d "$ICU_PATH" || ! -d "$ICU_PATH/unicode" ]]; then
         ICU_PATH_LOCAL="$CHAKRACORE_DIR/$ICU_PATH"
         if [[ ! -d "$ICU_PATH_LOCAL" || ! -d "$ICU_PATH_LOCAL/unicode" ]]; then
@@ -225,18 +225,18 @@ while [[ $# -gt 0 ]]; do
         ;;
 
     --custom-icu=*)
-        ICU_PATH=$1
+        ICU_PATH="$1"
         # `eval` used to resolve tilde in the path
-        eval ICU_PATH="${ICU_PATH:13}"
-        SET_CUSTOM_ICU $ICU_PATH
+        ICU_PATH="${ICU_PATH:13}"
+        SET_CUSTOM_ICU "$ICU_PATH"
         ;;
 
     # allow legacy --icu flag for compatability
     --icu=*)
-        ICU_PATH=$1
+        ICU_PATH="$1"
         # `eval` used to resolve tilde in the path
-        eval ICU_PATH="${ICU_PATH:6}"
-        SET_CUSTOM_ICU $ICU_PATH
+        ICU_PATH="${ICU_PATH:6}"
+        SET_CUSTOM_ICU "$ICU_PATH"
         ;;
 
     --embed-icu)
@@ -665,7 +665,7 @@ fi
 
 echo Generating $BUILD_TYPE makefiles
 echo $EXTRA_DEFINES
-cmake $CMAKE_GEN $CC_PREFIX $CMAKE_ICU $LTO $LTTNG $STATIC_LIBRARY $ARCH $TARGET_OS \
+cmake $CMAKE_GEN $CC_PREFIX "$CMAKE_ICU" $LTO $LTTNG $STATIC_LIBRARY $ARCH $TARGET_OS \
     $ENABLE_CC_XPLAT_TRACE $EXTRA_DEFINES -DCMAKE_BUILD_TYPE=$BUILD_TYPE $SANITIZE $NO_JIT $CMAKE_INTL \
     $WITHOUT_FEATURES $WB_FLAG $WB_ARGS $CMAKE_EXPORT_COMPILE_COMMANDS $LIBS_ONLY_BUILD\
     $VALGRIND $BUILD_RELATIVE_DIRECTORY $CCACHE_NAME
