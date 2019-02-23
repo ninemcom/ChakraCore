@@ -6172,7 +6172,11 @@ skipThunk:
         // For ARM we need to make sure that pipeline is synchronized with memory/cache for newly jitted code.
         // Note: this does not seem to affect perf, but if it was, we could add a boolean isCalled to EntryPointInfo
         //       and do ISB only for 1st time this entry point is called (potential working set regression though).
+#if !defined(_WIN32) && defined(_ARM64_)
+	asm("isb");
+#else
         _InstructionSynchronizationBarrier();
+#endif
 #endif
         uint newOffset = ::Math::PointerCastToIntegral<uint>(
             CALL_ENTRYPOINT_NOASSERT(address, function, CallInfo(CallFlags_InternalFrame, 1), this));

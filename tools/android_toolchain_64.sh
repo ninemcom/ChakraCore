@@ -12,17 +12,17 @@ fi
 
 ANDROID_TARGET=android-21
 
-export TOOLCHAIN=$PWD/android-toolchain-arm
+export TOOLCHAIN=$PWD/android-toolchain-arm64
 rm -rf $TOOLCHAIN
 mkdir -p $TOOLCHAIN
 $1/build/tools/make-standalone-toolchain.sh \
-    --toolchain=arm-linux-androideabi-4.9 \
-    --arch=arm \
+    --toolchain=aarch64-linux-android-4.9 \
+    --arch=arm64 \
     --install-dir=$TOOLCHAIN \
     --platform=$ANDROID_TARGET --force
 
 # use system python
-rm -f $TOOLCHAIN/bin/python
+rm $TOOLCHAIN/bin/python
 
 # keep cmake from using system ranlib
-cp android-toolchain-arm/bin/arm-linux-androideabi-ranlib android-toolchain-arm/bin/ranlib
+cp android-toolchain-arm64/bin/aarch64-linux-android-ranlib android-toolchain-arm64/bin/ranlib

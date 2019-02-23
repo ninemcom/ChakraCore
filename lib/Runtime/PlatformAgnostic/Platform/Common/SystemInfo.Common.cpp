@@ -11,6 +11,9 @@
 #if defined(__APPLE__)
 #include <mach-o/dyld.h> // _NSGetExecutablePath
 #elif defined(__linux__)
+#if defined(__reserved)
+#undef __reserved
+#endif
 #include <unistd.h> // readlink
 #endif
 

@@ -12,7 +12,7 @@
     va_list _vl;                                                    \
     va_start(_vl, callInfo);                                        \
     Js::Var* va = (Js::Var*)_vl
-#elif defined(__ANDROID__)
+#elif defined(__ANDROID__) && defined(_ARM_)
 // Just iterate and copy the values into a temp stack array
 #define DECLARE_ARGS_VARARRAY(va, ...)                              \
     Js::Var* va = reinterpret_cast<Js::Var*>(alloca(sizeof(Js::Var)*(callInfo.Count + (callInfo.Count & 1)))); \
@@ -88,6 +88,13 @@ inline int _count_args(const T1&, const T2&, const T3&, const T4&, const T5&, Js
 //  all parameters on stack.
 #define CALL_ENTRYPOINT_NOASSERT(entryPoint, function, callInfo, ...) \
     entryPoint(function, callInfo, nullptr, nullptr, nullptr, nullptr, \
+               function, callInfo, ##__VA_ARGS__)
+#elif defined(_ARM64_)
+// ARM64 saves up to 8 arguments to register
+// so push dummy 6 arguments
+#define CALL_ENTRYPOINT_NOASSERT(entryPoint, function, callInfo, ...) \
+    entryPoint(function, callInfo, nullptr, nullptr,                  \
+               nullptr, nullptr, nullptr, nullptr,                    \
                function, callInfo, ##__VA_ARGS__)
 #elif defined(_ARM_)
 // xplat-todo: fix me ARM

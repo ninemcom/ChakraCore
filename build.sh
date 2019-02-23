@@ -311,14 +311,24 @@ while [[ $# -gt 0 ]]; do
         _TARGET_OS="${_TARGET_OS:9}"
         if [[ $_TARGET_OS =~ "android" ]]; then
             if [[ -z "$TOOLCHAIN" ]]; then
-                OLD_PATH=$PATH
-                export TOOLCHAIN=$PWD/android-toolchain-arm
-                export PATH=$TOOLCHAIN/bin:$OLD_PATH
-                export AR=arm-linux-androideabi-ar
-                export CC=arm-linux-androideabi-clang
-                export CXX=arm-linux-androideabi-clang++
-                export LINK=arm-linux-androideabi-clang++
-                export STRIP=arm-linux-androideabi-strip
+                if [[ "$ARCH" == "arm64" ]]; then
+                    export TOOLCHAIN=$PWD/android-toolchain-arm64
+                    export AR=aarch64-linux-android-ar
+                    export CC=aarch64-linux-android-clang
+                    export CXX=aarch64-linux-android-clang++
+                    export LINK=aarch64-linux-android-clang++
+                    export STRIP=aarch64-linux-android-strip
+                else
+                    export TOOLCHAIN=$PWD/android-toolchain-arm
+                    export AR=arm-linux-androideabi-ar
+                    export CC=arm-linux-androideabi-clang
+                    export CXX=arm-linux-androideabi-clang++
+                    export LINK=arm-linux-androideabi-clang++
+                    export STRIP=arm-linux-androideabi-strip
+                fi
+
+                export PATH=$TOOLCHAIN/bin:$PATH
+
                 # override CXX and CC
                 _CXX="${TOOLCHAIN}/bin/${CXX}"
                 _CC="${TOOLCHAIN}/bin/${CC}"
@@ -652,6 +662,9 @@ pushd $BUILD_DIRECTORY > /dev/null
 if [[ $ARCH =~ "x86" ]]; then
     ARCH="-DCC_TARGETS_X86_SH=1"
     echo "Compile Target : x86"
+elif [[ $ARCH =~ "arm64" ]]; then
+    ARCH="-DCC_TARGETS_ARM64_SH=1"
+    echo "Compile Target : arm64"
 elif [[ $ARCH =~ "arm" ]]; then
     ARCH="-DCC_TARGETS_ARM_SH=1"
     echo "Compile Target : arm"

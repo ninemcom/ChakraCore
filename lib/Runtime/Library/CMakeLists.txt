@@ -124,6 +124,10 @@ if(CC_TARGETS_AMD64)
     set (CRLIB_SOURCE_CODES ${CRLIB_SOURCE_CODES}
         amd64/JavascriptFunctionA.S
     )
+elseif(CC_TARGETS_ARM64)
+    set (CRLIB_SOURCE_CODES ${CRLIB_SOURCE_CODES}
+        arm64/arm64_JavascriptFunctionA.S
+    )
 elseif(CC_TARGETS_ARM)
     set (CRLIB_SOURCE_CODES ${CRLIB_SOURCE_CODES}
         arm/arm_JavascriptFunctionA.S

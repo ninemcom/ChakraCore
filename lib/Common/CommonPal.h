@@ -153,7 +153,7 @@ inline int get_cpuid(int cpuInfo[4], int function_id)
             reinterpret_cast<unsigned int*>(&cpuInfo[2]),
             reinterpret_cast<unsigned int*>(&cpuInfo[3]));
 }
-#elif defined(_ARM_)
+#elif defined(_ARM_) || defined(_ARM64_)
 inline int get_cpuid(int cpuInfo[4], int function_id)
 {
     int empty[4] = {0};
@@ -382,6 +382,21 @@ typedef union _SLIST_HEADER {
     WORD   Depth;
     WORD   CpuId;
   } DUMMYSTRUCTNAME;
+} SLIST_HEADER, *PSLIST_HEADER;
+
+#elif defined(_ARM64_)
+
+typedef union _SLIST_HEADER {
+  struct { // original struct
+    ULONGLONG Alignment;
+    ULONGLONG Region;
+  } DUMMYSTRUCTNAME;
+  struct {
+    ULONGLONG Depth : 16;
+    ULONGLONG Sequence : 48;
+    ULONGLONG Reserved : 4;
+    ULONGLONG NextEntry : 60;
+  } HeaderX64;
 } SLIST_HEADER, *PSLIST_HEADER;
 
 #elif defined(_ARM_)
@@ -668,7 +683,7 @@ namespace PlatformAgnostic
 {
     __forceinline unsigned char _BitTestAndSet(LONG *_BitBase, int _BitPos)
     {
-#if defined(__clang__) && !defined(_ARM_)
+#if defined(__clang__) && !defined(_ARM_) && !defined(_ARM64_)
         // Clang doesn't expand _bittestandset intrinic to bts, and it's implemention also doesn't work for _BitPos >= 32
         unsigned char retval = 0;
         asm(
@@ -686,7 +701,7 @@ namespace PlatformAgnostic
 
     __forceinline unsigned char _BitTest(LONG *_BitBase, int _BitPos)
     {
-#if defined(__clang__) && !defined(_ARM_)
+#if defined(__clang__) && !defined(_ARM_) && !defined(_ARM64_)
         // Clang doesn't expand _bittest intrinic to bt, and it's implemention also doesn't work for _BitPos >= 32
         unsigned char retval;
         asm(
@@ -704,7 +719,7 @@ namespace PlatformAgnostic
 
     __forceinline unsigned char _InterlockedBitTestAndSet(volatile LONG *_BitBase, int _BitPos)
     {
-#if defined(__clang__) && !defined(_ARM_)
+#if defined(__clang__) && !defined(_ARM_) && !defined(_ARM64_)
         // Clang doesn't expand _interlockedbittestandset intrinic to lock bts, and it's implemention also doesn't work for _BitPos >= 32
         unsigned char retval;
         asm(
@@ -722,7 +737,7 @@ namespace PlatformAgnostic
 
     __forceinline unsigned char _InterlockedBitTestAndReset(volatile LONG *_BitBase, int _BitPos)
     {
-#if defined(__clang__) && !defined(_ARM_)
+#if defined(__clang__) && !defined(_ARM_) && !defined(_ARM64_)
         // Clang doesn't expand _interlockedbittestandset intrinic to lock btr, and it's implemention also doesn't work for _BitPos >= 32
         unsigned char retval;
         asm(

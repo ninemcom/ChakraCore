@@ -3192,6 +3192,8 @@ PALIMPORT BOOL PALAPI PAL_VirtualUnwindOutOfProc(CONTEXT *context,
 #define PAL_CS_NATIVE_DATA_SIZE 96
 #elif defined(__ANDROID__) && defined(_ARM_)
 #define PAL_CS_NATIVE_DATA_SIZE 12
+#elif defined(__ANDROID__) && defined(_ARM64_)
+#define PAL_CS_NATIVE_DATA_SIZE 92
 #elif defined(__LINUX__) && defined(_ARM_)
 #define PAL_CS_NATIVE_DATA_SIZE 80
 #elif defined(__LINUX__) && defined(_ARM64_)
@@ -6910,6 +6912,8 @@ ULONG_PTR __stdcall GetCurrentSP();
 #if defined(_ARM_)
 #define _ARM_BARRIER_SY 0xF
 #define _InstructionSynchronizationBarrier() __isb(_ARM_BARRIER_SY)
+#elif defined(_ARM64_)
+#define _InstructionSynchronizationBarrier() asm("isb")
 #endif
 
 #ifndef MAXUINT16
