@@ -41,9 +41,8 @@
 
     NESTED_ENTRY _ZN2Js18JavascriptFunction24DeferredDeserializeThunkEPNS_16RecyclableObjectENS_8CallInfoEz, _TEXT, NoHandler
 
-    // PROLOG_SAVE_REG_PAIR fp, lr, -80             // save parameter registers
-    stp     fp, lr, [sp, #-80]!                   // save parameter registers
-    mov     fp, sp
+    sub     fp, lr, #80
+    PROLOG_SAVE_REG_PAIR fp, lr, 0              // save parameter registers
 
     stp     x0, x1, [sp, #16]
     stp     x2, x3, [sp, #32]
@@ -57,8 +56,9 @@
     ldp     x4, x5, [sp, #48]
     ldp     x2, x3, [sp, #32]
     ldp     x0, x1, [sp, #16]
-    // EPILOG_RESTORE_REG_PAIR fp, lr, 80
-    ldp     fp, lr, [sp], #80
+
+    EPILOG_RESTORE_REG_PAIR fp, lr, 0
+    add     sp, sp, #80
 
     br x16                           // tail call to new entryPoint
 
@@ -67,9 +67,8 @@
 
     NESTED_ENTRY _ZN2Js18JavascriptFunction20DeferredParsingThunkEPNS_16RecyclableObjectENS_8CallInfoEz, _TEXT, NoHandler
 
-    // PROLOG_SAVE_REG_PAIR fp, lr, -80             // save parameter registers
-    stp     fp, lr, [sp, #-80]!                   // save parameter registers
-    mov     fp, sp
+    sub     sp, sp, #80
+    PROLOG_SAVE_REG_PAIR fp, lr, 0
 
     stp     x0, x1, [sp, #16]
     stp     x2, x3, [sp, #32]
@@ -85,8 +84,9 @@
     ldp     x4, x5, [sp, #48]
     ldp     x2, x3, [sp, #32]
     ldp     x0, x1, [sp, #16]
-    // EPILOG_RESTORE_REG_PAIR fp, lr, 80
-    ldp     fp, lr, [sp], #80
+
+    EPILOG_RESTORE_REG_PAIR fp, lr, 0
+    add     sp, sp, #80
 
     br x16                           // tail call to new entryPoint
 
@@ -95,10 +95,8 @@
 
     NESTED_ENTRY arm64_CallFunction, _TEXT, NoHandler
 
-    // PROLOG_SAVE_REG_PAIR fp, lr, -16         // save fp/lr (implicitly saves SP in FP)
-    sub     sp, sp, #0x40
-    stp     fp, lr, [sp, #0x30]                 // save fp/lr (implicitly saves SP in FP)
-    add     fp, sp, #0x30
+    sub     sp, sp, #16
+    PROLOG_SAVE_REG_PAIR fp, lr, 0              // save fp/lr (implicitly saves SP in FP)
 
     mov     x8, x4                              // copy entry point to x8
     mov     x9, x3                              // copy values pointer to x9
@@ -131,9 +129,8 @@ LOCAL_LABEL(CopyZero):
     blr     x8                                  // call saved entry point
 
     mov     sp, fp                              // explicitly restore sp
-    // EPILOG_RESTORE_REG_PAIR fp, lr, 16          // restore FP/LR
-    ldp     fp, lr, [sp], #0x10                 // restore FP/LR
-    // add     sp, sp, #0x40
+    EPILOG_RESTORE_REG_PAIR fp, lr, 0           // restore fp/lr
+    add     sp, sp, #16
     EPILOG_RETURN                               // return
 
 LOCAL_LABEL(StackAlloc):
