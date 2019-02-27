@@ -95,6 +95,7 @@ using namespace CorUnix;
 
 SET_DEFAULT_DEBUG_CHANNEL(CRITSEC);
 
+#define TRACE_CS_LOGIC
 #ifdef TRACE_CS_LOGIC
 #define CS_TRACE TRACE
 #else

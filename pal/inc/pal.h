@@ -71,7 +71,7 @@ namespace std {
 #define S_IEXEC   0000100
 
 #ifndef CC_AND_TAG
-#define CC_AND_TAG "chakracore-log"
+#define CC_AND_TAG "UE4js"
 #endif
 #include <android/log.h>
 #include <stdarg.h>
